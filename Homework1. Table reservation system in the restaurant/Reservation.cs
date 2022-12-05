@@ -19,7 +19,6 @@ namespace Homework1._Table_reservation_system_in_the_restaurant
 
         public Reservation(string name, string phoneNumber, DateTime dateTime, int quantityOfPeople, int tableNumber)
         {
-            Number = NumberReservationGenerator.GetNextNumber();
             Name = name;
             PhoneNumber = phoneNumber;
             DateTime = dateTime;
@@ -29,14 +28,13 @@ namespace Homework1._Table_reservation_system_in_the_restaurant
 
         public Reservation(DateTime dateTime, int tableNumber)
         {
-            Number = NumberReservationGenerator.GetNextNumber();
             DateTime = dateTime;
             TableNumber = tableNumber;
         }
 
         public Reservation()
         {
-         }
+        }
 
         public override bool Equals(object obj)
         {

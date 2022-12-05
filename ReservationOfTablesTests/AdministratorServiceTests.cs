@@ -2,12 +2,24 @@ using FluentAssertions;
 using Homework1._Table_reservation_system_in_the_restaurant;
 using Homework1._Table_reservation_system_in_the_restaurant.Repositories;
 using Homework1._Table_reservation_system_in_the_restaurant.Services;
+using NUnit.Framework;
+using ReservationSystemInRestaurantTests;
 using System.Text.Json;
 
 namespace ReservationOfTablesTests
 {
     public class AdministratorServiceTests
     {
+        private ReservationRepository _reservationRepository;
+        private TableRepository _tableRepository;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _reservationRepository = new ReservationRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
+            _tableRepository = new TableRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
+        }
+
         [Test]
 
         public void AddReservationOneTest()
@@ -15,13 +27,8 @@ namespace ReservationOfTablesTests
             Table table = new Table(11, 4);
             Reservation reservationOne = new Reservation(new DateTime(2022, 01, 01, 10, 00, 00), 1);
             Reservation reservationCheck = new Reservation(new DateTime(2022, 01, 01, 14, 00, 00), 1);
-            ReservationRepository reservationRepository = new ReservationRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
-            TableRepository tableRepository = new TableRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
 
-            ClearTableRepository(tableRepository.Path);
-            ClearReservationRepository(reservationRepository.Path);
-                        
-            AdministratorService admin = new AdministratorService(reservationRepository, tableRepository);
+            AdministratorService admin = new AdministratorService(_reservationRepository, _tableRepository);
             admin.AddTable(table);
             admin.AddReservation(reservationOne);
             admin.AddReservation(reservationCheck);
@@ -43,13 +50,7 @@ namespace ReservationOfTablesTests
         public void AddReservationTestForTwoReservations(int mockNumber, int mockNumberExpected)
         {
             Table table = new Table(1, 4);
-            ReservationRepository reservationRepository = new ReservationRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
-            TableRepository tableRepository = new TableRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
-
-            ClearTableRepository(tableRepository.Path);
-            ClearReservationRepository(reservationRepository.Path);
-
-            AdministratorService admin = new AdministratorService(reservationRepository, tableRepository);
+            AdministratorService admin = new AdministratorService(_reservationRepository, _tableRepository);
             admin.AddTable(table);
             List<Reservation> reservationsForAdd = ReservationMock(mockNumber);
             admin.AddReservation(reservationsForAdd[0]);
@@ -66,13 +67,7 @@ namespace ReservationOfTablesTests
         public void AddReservationTestForThreeReservations(int mockNumber, int mockNumberExpected)
         {
             Table table = new Table(1, 4);
-            ReservationRepository reservationRepository = new ReservationRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
-            TableRepository tableRepository = new TableRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
-
-            ClearTableRepository(tableRepository.Path);
-            ClearReservationRepository(reservationRepository.Path);
-
-            AdministratorService admin = new AdministratorService(reservationRepository, tableRepository);
+            AdministratorService admin = new AdministratorService(_reservationRepository, _tableRepository);
             admin.AddTable(table);
             List<Reservation> reservationsForAdd = ReservationMock(mockNumber);
             admin.AddReservation(reservationsForAdd[0]);
@@ -80,8 +75,6 @@ namespace ReservationOfTablesTests
             admin.AddReservation(reservationsForAdd[2]);
 
             List<Reservation> expected = ReservationMock(mockNumberExpected);
-
-
             List<Reservation> actual = admin.GetAllReservation();
             actual.Should().BeEquivalentTo(expected);
         }
@@ -187,22 +180,55 @@ namespace ReservationOfTablesTests
             }
         }
 
-        public void ClearTableRepository(string path)
+        [TestCaseSource(typeof(AdministratorServiceTestCaseSources), nameof(AdministratorServiceTestCaseSources.RemoveReservationTestCaseSource))]
+        public void RemoveReservationTest(Dictionary<int, Reservation> baseReservation, int numberRemoveReservation, Dictionary<int, Reservation> expectedReservation, bool expectedReservationBool)
         {
-            using (StreamWriter sw = new StreamWriter(path))
+            using (StreamWriter sw = new StreamWriter(_reservationRepository.Path))
             {
-                string jsn = JsonSerializer.Serialize(new Dictionary<int, Table>());
+                string jsn = JsonSerializer.Serialize(baseReservation);
                 sw.WriteLine(jsn);
             }
+            AdministratorService admin = new AdministratorService(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
+            admin.RemoveReservation(numberRemoveReservation);
+            Dictionary<int, Reservation> actualReservation;
+            using (StreamReader sr = new StreamReader(_reservationRepository.Path))
+            {
+                string jsn = sr.ReadLine();
+                actualReservation = JsonSerializer.Deserialize<Dictionary<int, Reservation>>(jsn)!;
+            }
+            CollectionAssert.AreEqual(expectedReservation, actualReservation);
+
+            bool actualReservationBool = admin.RemoveReservation(numberRemoveReservation);
+            CollectionAssert.AreEqual(expectedReservation, actualReservation);
         }
 
-        public void ClearReservationRepository(string path)
+        [TestCaseSource(typeof(AdministratorServiceTestCaseSources), nameof(AdministratorServiceTestCaseSources.GetAllReservationTestCaseSource))]
+        public void GetAllReservationTest(Dictionary<int, Reservation> baseReservation, List<Reservation> expectedReservation)
         {
-            using (StreamWriter sw = new StreamWriter(path))
+            AdministratorService admin = new AdministratorService(_reservationRepository, _tableRepository);
+            using (StreamWriter sw = new StreamWriter(_reservationRepository.Path))
             {
-                string jsn = JsonSerializer.Serialize(new Dictionary<int, Reservation>());
+                string jsn = JsonSerializer.Serialize(baseReservation);
                 sw.WriteLine(jsn);
             }
+            List<Reservation> actualReservation = admin.GetAllReservation();
+            CollectionAssert.AreEqual(expectedReservation, actualReservation);
+        }
+        
+
+
+        //public List<Reservation> GetAllReservation()
+        //{
+        //    var reservations = _reservationRepository.GetReservations();
+        //    return reservations.Values.ToList();
+        //}
+
+
+        [TearDown]
+        public void TearDown()
+        {
+            File.Delete(_reservationRepository.Path);
+            File.Delete(_tableRepository.Path);
         }
     }
 }

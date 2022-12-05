@@ -16,10 +16,10 @@ namespace Homework1._Table_reservation_system_in_the_restaurant.Services
             _tableRepository = tableRepository;
         }
 
-        public AdministratorService()
+        public AdministratorService(string path)
         {
-            _reservationRepository = new ReservationRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\");
-            _tableRepository = new TableRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\");
+            _reservationRepository = new ReservationRepository(path);
+            _tableRepository = new TableRepository(path);
         }
 
         public bool AddReservation(Reservation reservation)
@@ -38,9 +38,18 @@ namespace Homework1._Table_reservation_system_in_the_restaurant.Services
             return true;
         }
 
-        public void RemoveReservation(int numberReservation)
+        public bool RemoveReservation(int numberReservation)
         {
-            _reservationRepository.RemoveReservation(numberReservation);
+            var allReservations = _reservationRepository.GetReservations();
+            if (allReservations.ContainsKey(numberReservation))
+            {
+                _reservationRepository.RemoveReservation(numberReservation);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public List<Reservation> GetAllReservation()

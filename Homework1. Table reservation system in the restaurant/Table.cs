@@ -6,13 +6,10 @@
 
         public int CapacityOfOneTable { get; set; }
 
-        public bool isReserved { get; set; }
-
         public Table(int number, int capacity)
         {
             Number = number;
             CapacityOfOneTable = capacity;
-            isReserved = false;
         }
         public Table()
         {
@@ -22,8 +19,7 @@
         {
             return obj is Table table &&
                    Number == table.Number &&
-                   CapacityOfOneTable == table.CapacityOfOneTable &&
-                   isReserved == table.isReserved;
+                   CapacityOfOneTable == table.CapacityOfOneTable;
         }
     }
 }
