@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ReservationSystemInRestaurantTests
 {
-    public static class ReservationTableTestCaseSources
+    public static class TableRepositoryTestCaseSources
     {
         public static IEnumerable AddTableTestSource()
         {
@@ -39,8 +39,9 @@ namespace ReservationSystemInRestaurantTests
             {
                 { tableOne.Number, tableOne}
             };
+            bool expectedTablesBool = true;
 
-            yield return new Object[] { baseTable, numberRemoveTable, expectedTable };
+            yield return new Object[] { baseTable, numberRemoveTable, expectedTable, expectedTablesBool };
 
             baseTable = new Dictionary<int, Table>
             {
@@ -49,11 +50,25 @@ namespace ReservationSystemInRestaurantTests
             numberRemoveTable = tableOne.Number;
             expectedTable = new Dictionary<int, Table>();
 
-            yield return new Object[] { baseTable, numberRemoveTable, expectedTable };
+            yield return new Object[] { baseTable, numberRemoveTable, expectedTable, expectedTablesBool };
 
             tableOne = new Table();
 
-            yield return new Object[] { baseTable, numberRemoveTable, expectedTable };
+            yield return new Object[] { baseTable, numberRemoveTable, expectedTable, expectedTablesBool };
+
+            tableOne = new Table(3,10);
+            baseTable = new Dictionary<int, Table>
+            {
+                { tableOne.Number, tableOne}
+            };
+            numberRemoveTable = 6;
+            expectedTable = new Dictionary<int, Table>
+            {
+                { tableOne.Number, tableOne}
+            };
+            expectedTablesBool = false;
+
+            yield return new Object[] { baseTable, numberRemoveTable, expectedTable, expectedTablesBool };
         }
 
         public static IEnumerable GetTableByNumberTestSource()

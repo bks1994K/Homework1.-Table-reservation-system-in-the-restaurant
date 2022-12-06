@@ -37,14 +37,15 @@ namespace Homework1._Table_reservation_system_in_the_restaurant.Repositories
             SaveAll(tables);
         }
 
-        public void RemoveTable(int numberTable)
+        public bool RemoveTable(int numberTable)
         {
             Dictionary<int, Table> tables = LoadAll();
-            if(!tables.Remove(numberTable))
+            if(tables.Remove(numberTable))
             {
-                throw new ArgumentException($"Table with number {numberTable} is not exists");
+                SaveAll(tables);
+                return true;
             }
-            SaveAll(tables);
+            return false;
         }
 
         private void SaveAll(Dictionary<int, Table> tables)

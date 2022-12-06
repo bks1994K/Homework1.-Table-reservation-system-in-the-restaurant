@@ -28,13 +28,12 @@ namespace ReservationSystemInRestaurantTests
                 string jsn = JsonSerializer.Serialize(tables);
                 sw.WriteLine(jsn);
             }
-
             Dictionary<int, Table> expectedTables = tables;
             Dictionary<int, Table> actualTables = _tableRepository.GetTables();
             CollectionAssert.AreEqual(expectedTables, actualTables);
         }
 
-        [TestCaseSource(typeof(ReservationTableTestCaseSources), nameof(ReservationTableTestCaseSources.AddTableTestSource))]
+        [TestCaseSource(typeof(TableRepositoryTestCaseSources), nameof(TableRepositoryTestCaseSources.AddTableTestSource))]
         public void AddTableTest(Dictionary<int, Table> baseTables, Table addTable, Dictionary<int, Table> expectedTables)
         {
             using (StreamWriter sw = new StreamWriter(_path))
@@ -42,7 +41,6 @@ namespace ReservationSystemInRestaurantTests
                 string jsn = JsonSerializer.Serialize(baseTables);
                 sw.WriteLine(jsn);
             }
-
             _tableRepository.AddTable(addTable);
             Dictionary<int, Table> actualTables;
             using (StreamReader sr = new StreamReader(_path))
@@ -53,39 +51,26 @@ namespace ReservationSystemInRestaurantTests
             CollectionAssert.AreEqual(expectedTables, actualTables);
         }
 
-        [TestCaseSource(typeof(ReservationTableTestCaseSources), nameof(ReservationTableTestCaseSources.RemoveTableTestSource))]
-        public void RemoveTableTest(Dictionary<int, Table> baseTable, int numberRemoveTable, Dictionary<int, Table> expectedTable)
+        [TestCaseSource(typeof(TableRepositoryTestCaseSources), nameof(TableRepositoryTestCaseSources.RemoveTableTestSource))]
+        public void RemoveTableTest(Dictionary<int, Table> baseTable, int numberRemoveTable, Dictionary<int, Table> expectedTables, bool expectedTablesBool)
         {
             using (StreamWriter sw = new StreamWriter(_path))
             {
                 string jsn = JsonSerializer.Serialize(baseTable);
                 sw.WriteLine(jsn);
             }
-
-            _tableRepository.RemoveTable(numberRemoveTable);
+            bool actualTablesBool = _tableRepository.RemoveTable(numberRemoveTable);
             Dictionary<int, Table> actualTables;
             using (StreamReader sr = new StreamReader(_path))
             {
                 string jsn = sr.ReadLine();
                 actualTables = JsonSerializer.Deserialize<Dictionary<int, Table>>(jsn)!;
             }
-            CollectionAssert.AreEqual(expectedTable, actualTables);
+            CollectionAssert.AreEqual(expectedTables, actualTables);
+            Assert.AreEqual(expectedTablesBool, actualTablesBool);
         }
 
-        [Test]
-        public void RemoveTableTest_WhenNumberTableIsNotExists_ShouldArgumentException()
-        {
-            Table tableOne = new Table(7, 10);
-            Dictionary<int, Table> baseTable = new Dictionary<int, Table> { { tableOne.Number, tableOne } };
-            using (StreamWriter sw = new StreamWriter(_path))
-            {
-                string jsn = JsonSerializer.Serialize(baseTable);
-                sw.WriteLine(jsn);
-            }
-            Assert.Throws<ArgumentException>(() => _tableRepository.RemoveTable(2));
-        }
-
-        [TestCaseSource(typeof(ReservationTableTestCaseSources), nameof(ReservationTableTestCaseSources.GetTableByNumberTestSource))]
+        [TestCaseSource(typeof(TableRepositoryTestCaseSources), nameof(TableRepositoryTestCaseSources.GetTableByNumberTestSource))]
         public void GetTableByNumberTest(Dictionary<int, Table> baseTable, int tableNumber, Table expectedTable)
         {
             using (StreamWriter sw = new StreamWriter(_path))
@@ -93,7 +78,6 @@ namespace ReservationSystemInRestaurantTests
                 string jsn = JsonSerializer.Serialize(baseTable);
                 sw.WriteLine(jsn);
             }
-
             Table actualTable = _tableRepository.GetTableByNumber(tableNumber);
             Assert.AreEqual(expectedTable, actualTable);
         }

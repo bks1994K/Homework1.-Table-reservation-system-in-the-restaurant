@@ -101,14 +101,23 @@ namespace Homework1._Table_reservation_system_in_the_restaurant.Services
             return result;
         }
 
-        public void AddTable(Table table)
+        public bool AddTable(Table table)
         {
-            _tableRepository.AddTable(table);
+            Dictionary<int, Table> tables = _tableRepository.GetTables();
+            if (!tables.ContainsKey(table.Number))
+            {
+                _tableRepository.AddTable(table);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public void RemoveTable(int numberTable)
+        public bool RemoveTable(int numberTable)
         {
-            _tableRepository.RemoveTable(numberTable);
+            return _tableRepository.RemoveTable(numberTable);
         }
     }
 }

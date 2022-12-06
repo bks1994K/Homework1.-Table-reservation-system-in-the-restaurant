@@ -16,17 +16,14 @@ namespace ReservationSystemInRestaurantTests
             Dictionary<int, Reservation> reservations = new Dictionary<int, Reservation>();
             reservations.Add(1, reservationOne);
             reservations.Add(2, reservationTwo);
-
             string path = @"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\ReservationsTest.txt";
             using (StreamWriter sw = new StreamWriter(path))
             {
                 string jsn = JsonSerializer.Serialize(reservations);
                 sw.WriteLine(jsn);
             }
-
             ReservationRepository reservationRepository = new ReservationRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
             reservationRepository.Path = path;
-
             Dictionary<int, Reservation> actual = reservationRepository.GetReservations();
             Dictionary<int, Reservation> expected = reservations;
             CollectionAssert.AreEqual(expected, actual);
@@ -38,7 +35,6 @@ namespace ReservationSystemInRestaurantTests
             string path = @"Reservations..Test";
             ReservationRepository reservationRepository = new ReservationRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
             reservationRepository.Path = path;
-
             Dictionary<int, Reservation> actual = reservationRepository.GetReservations();
             Dictionary<int, Reservation> expected = new Dictionary<int, Reservation>();
             CollectionAssert.AreEqual(expected, actual);
@@ -56,7 +52,6 @@ namespace ReservationSystemInRestaurantTests
             ReservationRepository reservationRepository = new ReservationRepository(@"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\");
             reservationRepository.Path = path;
             reservationRepository.AddReservation(addReservation);
-
             Dictionary<int, Reservation> actualReservations;
             using (StreamReader sr = new StreamReader(path))
             {

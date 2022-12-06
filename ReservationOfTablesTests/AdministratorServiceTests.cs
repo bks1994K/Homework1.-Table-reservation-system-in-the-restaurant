@@ -46,7 +46,6 @@ namespace ReservationOfTablesTests
         [TestCase(7, 8)]
         [TestCase(7, 8)]
         [TestCase(14, 14)]
-
         public void AddReservationTestForTwoReservations(int mockNumber, int mockNumberExpected)
         {
             Table table = new Table(1, 4);
@@ -63,7 +62,6 @@ namespace ReservationOfTablesTests
         [TestCase(9, 9)]
         [TestCase(10, 11)]
         [TestCase(12, 13)]
-
         public void AddReservationTestForThreeReservations(int mockNumber, int mockNumberExpected)
         {
             Table table = new Table(1, 4);
@@ -214,15 +212,91 @@ namespace ReservationOfTablesTests
             List<Reservation> actualReservation = admin.GetAllReservation();
             CollectionAssert.AreEqual(expectedReservation, actualReservation);
         }
-        
 
+        [TestCaseSource(typeof(AdministratorServiceTestCaseSources), nameof(AdministratorServiceTestCaseSources.GetAllReservationOnDateTestCaseSource))]
+        public void GetAllReservationOnDateTest(Dictionary<int, Reservation> baseReservation, DateTime date, List<Reservation> expectedReservation)
+        {
+            AdministratorService admin = new AdministratorService(_reservationRepository, _tableRepository);
+            using (StreamWriter sw = new StreamWriter(_reservationRepository.Path))
+            {
+                string jsn = JsonSerializer.Serialize(baseReservation);
+                sw.WriteLine(jsn);
+            }
+            List<Reservation> actualReservation = admin.GetAllReservationOnDate(date);
+            CollectionAssert.AreEqual(expectedReservation, actualReservation);
+        }
 
-        //public List<Reservation> GetAllReservation()
-        //{
-        //    var reservations = _reservationRepository.GetReservations();
-        //    return reservations.Values.ToList();
-        //}
+        [TestCaseSource(typeof(AdministratorServiceTestCaseSources), nameof(AdministratorServiceTestCaseSources.GetAllReservationForTableTestCaseSource))]
+        public void GetAllReservationForTableTest(Dictionary<int, Reservation> baseReservation, int numberTable, List<Reservation> expectedReservation)
+        {
+            string path = @"C:\Users\Кристина\Desktop\MakeUPro\Коды\Tests\";
+            AdministratorService admin = new AdministratorService(path);
+            using (StreamWriter sw = new StreamWriter(_reservationRepository.Path))
+            {
+                string jsn = JsonSerializer.Serialize(baseReservation);
+                sw.WriteLine(jsn);
+            }
+            List<Reservation> actualReservation = admin.GetAllReservationForTable(numberTable);
+            CollectionAssert.AreEqual(expectedReservation, actualReservation);
+        }
 
+        [TestCaseSource(typeof(AdministratorServiceTestCaseSources), nameof(AdministratorServiceTestCaseSources.GetAllReservationOnDateWithCapacityTestCaseSource))]
+        public void GetAllReservationOnDateWithCapacityTest(Dictionary<int, Reservation> baseReservations, Dictionary<int, Table> tables, DateTime date, int quantity, List<Reservation> expectedReservation)
+        {
+            AdministratorService admin = new AdministratorService(_reservationRepository, _tableRepository);
+            using (StreamWriter sw = new StreamWriter(_reservationRepository.Path))
+            {
+                string jsn = JsonSerializer.Serialize(baseReservations);
+                sw.WriteLine(jsn);
+            }
+            using (StreamWriter sw = new StreamWriter(_tableRepository.Path))
+            {
+                string jsn = JsonSerializer.Serialize(tables);
+                sw.WriteLine(jsn);
+            }
+            List<Reservation> actualReservation = admin.GetAllReservationOnDateWithCapacity(date, quantity);
+            CollectionAssert.AreEqual(expectedReservation, actualReservation);
+        }
+
+        [TestCaseSource(typeof(AdministratorServiceTestCaseSources), nameof(AdministratorServiceTestCaseSources.AddTableTestCaseSource))]
+        public void AddTableTest(Dictionary<int, Table> baseTables, Table addTable, Dictionary<int, Table> expectedTables, bool expectedTablesBool)
+        {
+            AdministratorService admin = new AdministratorService(_reservationRepository, _tableRepository);
+            using (StreamWriter sw = new StreamWriter(_tableRepository.Path))
+            {
+                string jsn = JsonSerializer.Serialize(baseTables);
+                sw.WriteLine(jsn);
+            }
+            bool actualTablesBool = admin.AddTable(addTable);
+            Dictionary<int, Table> actualTables;
+            using (StreamReader sr = new StreamReader(_tableRepository.Path))
+            {
+                string jsn = sr.ReadLine();
+                actualTables = JsonSerializer.Deserialize<Dictionary<int, Table>>(jsn);
+            }
+            CollectionAssert.AreEqual(expectedTables, actualTables);
+            Assert.AreEqual(expectedTablesBool, actualTablesBool);
+        }
+
+        [TestCaseSource(typeof(AdministratorServiceTestCaseSources), nameof(AdministratorServiceTestCaseSources.RemoveTableTestCaseSource))]
+        public void RemoveTableTest(Dictionary<int, Table> baseTable, int numberRemoveTable, Dictionary<int, Table> expectedTable, bool expectedTablesBool)
+        {
+            AdministratorService admin = new AdministratorService(_reservationRepository, _tableRepository);
+            using (StreamWriter sw = new StreamWriter(_tableRepository.Path))
+            {
+                string jsn = JsonSerializer.Serialize(baseTable);
+                sw.WriteLine(jsn);
+            }
+            bool actualTablesBool = admin.RemoveTable(numberRemoveTable);
+            Dictionary<int, Table> actualTables;
+            using (StreamReader sr = new StreamReader(_tableRepository.Path))
+            {
+                string jsn = sr.ReadLine();
+                actualTables = JsonSerializer.Deserialize<Dictionary<int, Table>>(jsn)!;
+            }
+            CollectionAssert.AreEqual(expectedTable, actualTables);
+            Assert.AreEqual(expectedTablesBool, actualTablesBool);
+        }
 
         [TearDown]
         public void TearDown()
